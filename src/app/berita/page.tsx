@@ -1,30 +1,33 @@
-import { createClient } from '@/lib/supabase/server'
-import Image from 'next/image'
-import { notFound } from 'next/navigation'
+import { Metadata } from "next";
+import { createClient } from "@/lib/supabase/server";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+
+export const metadata: Metadata = {
+  title: "Berita Desa Siboro - Kabar Terkini",
+  description: "Kumpulan berita dan informasi terbaru seputar kegiatan Desa Siboro, Kecamatan Sianjur Simula, Kabupaten Samosir.",
+};
 
 function getYoutubeEmbedUrl(url: string): string | null {
-  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]+)/)
-  return match ? `https://www.youtube.com/embed/${match[1]}` : null
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]+)/);
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
 }
 
 export default async function DetailBerita({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-  const supabase = await createClient()
+  const { slug } = await params;
+  const supabase = await createClient();
 
-  const { data: berita } = await supabase
-    .from('berita')
-    .select('*')
-    .eq('slug', slug)
-    .eq('published', true)
-    .single()
+  const { data: berita } = await supabase.from("berita").select("*").eq("slug", slug).eq("published", true).single();
 
-  if (!berita) notFound()
+  if (!berita) notFound();
 
-  const tanggal = new Date(berita.created_at).toLocaleDateString('id-ID', {
-    day: 'numeric', month: 'long', year: 'numeric'
-  })
+  const tanggal = new Date(berita.created_at).toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 
-  const youtubeEmbed = berita.video_url ? getYoutubeEmbedUrl(berita.video_url) : null
+  const youtubeEmbed = berita.video_url ? getYoutubeEmbedUrl(berita.video_url) : null;
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-10">
@@ -43,11 +46,7 @@ export default async function DetailBerita({ params }: { params: Promise<{ slug:
       {/* Video: prioritas YouTube dulu, baru file upload */}
       {youtubeEmbed && (
         <div className="mt-6 aspect-video">
-          <iframe
-            src={youtubeEmbed}
-            className="w-full h-full rounded-lg"
-            allowFullScreen
-          />
+          <iframe src={youtubeEmbed} className="w-full h-full rounded-lg" allowFullScreen />
         </div>
       )}
 
@@ -60,5 +59,5 @@ export default async function DetailBerita({ params }: { params: Promise<{ slug:
         </div>
       )}
     </main>
-  )
+  );
 }
