@@ -16,4 +16,4 @@ export default async function AdminProfilPage() {
       <FormProfil initialData={profil || { sejarah: '', visi: '', misi: '', deskripsi: '' }} />
     </main>
   )
-}mkdir -p src/app/admin/kontak
+}
