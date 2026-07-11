@@ -1,48 +1,51 @@
-import { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
-import BeritaCard from '@/components/BeritaCard'
+import Link from 'next/link'
+import Image from 'next/image'
 
-export const metadata: Metadata = {
-  title: 'Berita Desa Siboro - Kabar Terkini',
-  description: 'Kumpulan berita dan informasi terbaru seputar kegiatan Desa Siboro, Kecamatan Sianjur Simula, Kabupaten Samosir.',
+type BeritaCardProps = {
+  judul: string
+  slug: string
+  gambar_url: string | null
+  kategori: string | null
+  created_at: string
 }
 
-export default async function BeritaPage() {
-  const supabase = await createClient()
-
-  const { data: berita } = await supabase
-    .from('berita')
-    .select('judul, slug, gambar_url, kategori, created_at')
-    .eq('published', true)
-    .order('created_at', { ascending: false })
+export default function BeritaCard({ judul, slug, gambar_url, kategori, created_at }: BeritaCardProps) {
+  const tanggal = new Date(created_at).toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
 
   return (
-    <div className="flex flex-col md:flex-row min-h-[70vh]">
-      {/* Sidebar */}
-      <aside className="md:w-72 bg-blue-800 text-white px-6 py-12 flex-shrink-0">
-        <div className="sticky top-24">
-          <div className="w-12 h-12 bg-amber-400 rounded-xl flex items-center justify-center text-2xl mb-4">
+    <Link
+      href={`/berita/${slug}`}
+      className="group block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition"
+    >
+      <div className="relative h-44 bg-gray-100">
+        {gambar_url ? (
+          <Image
+            src={gambar_url}
+            alt={judul}
+            fill
+            className="object-cover group-hover:scale-105 transition"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-300 text-4xl">
             📰
           </div>
-          <h1 className="text-2xl font-bold mb-2">Berita Desa</h1>
-          <p className="text-blue-200 text-sm leading-relaxed">
-            Informasi dan berita terbaru dari Desa Siboro
-          </p>
-        </div>
-      </aside>
-
-      {/* Konten */}
-      <main className="flex-1 max-w-6xl px-4 py-12">
-        {berita && berita.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {berita.map((b) => (
-              <BeritaCard key={b.slug} {...b} />
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-400 text-center py-20">Belum ada berita.</p>
         )}
-      </main>
-    </div>
+        {kategori && (
+          <span className="absolute top-3 left-3 bg-amber-400 text-blue-950 text-xs font-semibold px-3 py-1 rounded-full">
+            {kategori}
+          </span>
+        )}
+      </div>
+      <div className="p-4">
+        <p className="text-xs text-gray-400 mb-1">{tanggal}</p>
+        <h3 className="font-semibold text-gray-900 leading-snug line-clamp-2 group-hover:text-blue-700 transition">
+          {judul}
+        </h3>
+      </div>
+    </Link>
   )
 }
