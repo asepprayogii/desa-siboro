@@ -10,12 +10,10 @@ export default async function Home() {
     supabase.from("profil_desa").select("*").single(),
     supabase.from("perangkat_desa").select("*", { count: "exact", head: true }),
     supabase.from("galeri").select("id", { count: "exact", head: true }),
-    supabase.from("berita").select("kategori").eq("published", true), // ✅ Hapus { distinct: true }
+    supabase.from("berita").select("kategori").eq("published", true),
   ]);
 
   const totalBerita = beritaTerbaru?.length ?? 0;
-  
-  // ✅ Hitung kategori unik dengan Set
   const uniqueKategori = new Set(allKategori?.map((b) => b.kategori).filter(Boolean));
   const totalKategori = uniqueKategori.size;
 
@@ -26,13 +24,11 @@ export default async function Home() {
         .filter((line) => line.length > 0)
     : [];
 
-  // Format tanggal Indonesia
   const formatTanggal = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
   };
 
-  // Truncate text
   const truncate = (text: string, max: number) => {
     if (!text) return "";
     const clean = text.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
@@ -55,9 +51,6 @@ export default async function Home() {
             <br />
             <span className="text-amber-400">Desa Siboro</span>
           </h1>
-          <p className="text-blue-50 text-base md:text-lg mb-8 max-w-xl mx-auto">
-            Desa yang asri di tepian Danau Toba, menjunjung kearifan lokal menuju masa depan yang berkelanjutan.
-          </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/profil" className="bg-amber-400 hover:bg-amber-300 text-blue-950 font-semibold px-6 py-3 rounded-full transition">
               Tentang Desa →
@@ -204,10 +197,9 @@ export default async function Home() {
         </section>
       )}
 
-      {/* BERITA TERBARU - Redesigned */}
+      {/* BERITA TERBARU */}
       <section className="bg-white py-20">
         <div className="max-w-6xl mx-auto px-4">
-          {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12">
             <div>
               <span className="inline-block bg-rose-100 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full mb-3">
@@ -224,7 +216,6 @@ export default async function Home() {
             </Link>
           </div>
 
-          {/* Grid Berita */}
           {beritaTerbaru && beritaTerbaru.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {beritaTerbaru.map((b) => (
@@ -263,7 +254,6 @@ function StatCard({ icon, value, label }: { icon: React.ReactNode; value: string
   );
 }
 
-// Berita Card khusus Homepage (mirip screenshot Desa Blarang)
 function BeritaCardHome({
   judul,
   slug,
@@ -285,7 +275,6 @@ function BeritaCardHome({
 }) {
   return (
     <Link href={`/berita/${slug}`} className="group block bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
-      {/* Gambar */}
       <div className="relative h-52 overflow-hidden">
         {gambar_url ? (
           <Image
@@ -301,15 +290,12 @@ function BeritaCardHome({
             </svg>
           </div>
         )}
-        {/* Badge Kategori di pojok kiri atas gambar */}
         <div className="absolute top-3 left-3 bg-blue-700 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
           {kategori || "Umum"}
         </div>
       </div>
 
-      {/* Konten */}
       <div className="p-5">
-        {/* Tanggal */}
         {created_at && (
           <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-2">
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -319,19 +305,16 @@ function BeritaCardHome({
           </div>
         )}
 
-        {/* Judul */}
         <h3 className="font-bold text-base md:text-lg text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-700 transition-colors leading-snug">
           {judul}
         </h3>
 
-        {/* Deskripsi singkat */}
         {isi && (
           <p className="text-sm text-gray-500 leading-relaxed line-clamp-3 mb-4">
             {truncate(isi, 100)}
           </p>
         )}
 
-        {/* Link Baca Selengkapnya */}
         <div className="inline-flex items-center gap-1 text-sm font-semibold text-blue-700 group-hover:text-blue-800 transition-colors">
           Baca Selengkapnya
           <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
