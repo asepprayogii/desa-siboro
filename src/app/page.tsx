@@ -14,14 +14,14 @@ export default async function Home() {
   ]);
 
   const totalBerita = beritaTerbaru?.length ?? 0;
-  const uniqueKategori = new Set(allKategori?.map((b) => b.kategori).filter(Boolean));
+  const uniqueKategori = new Set(allKategori?.map((b: { kategori: string | null }) => b.kategori).filter(Boolean));
   const totalKategori = uniqueKategori.size;
 
-  const misiList = profil?.misi
+  const misiList: string[] = profil?.misi
     ? profil.misi
         .split(/\n+/)
-        .map((line) => line.replace(/^\d+[\.\)\-]\s*/, "").trim())
-        .filter((line) => line.length > 0)
+        .map((line: string) => line.replace(/^\d+[\.\)\-]\s*/, "").trim())
+        .filter((line: string) => line.length > 0)
     : [];
 
   const formatTanggal = (dateStr: string) => {
@@ -31,7 +31,10 @@ export default async function Home() {
 
   const truncate = (text: string, max: number) => {
     if (!text) return "";
-    const clean = text.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+    const clean = text
+      .replace(/<[^>]*>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
     return clean.length > max ? clean.substring(0, max) + "..." : clean;
   };
 
@@ -43,9 +46,7 @@ export default async function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
 
         <div className="relative z-10 px-4 max-w-3xl">
-          <span className="inline-block bg-amber-400 text-blue-950 text-xs font-semibold px-4 py-1.5 rounded-full mb-4">
-            Website Resmi Desa Siboro
-          </span>
+          <span className="inline-block bg-amber-400 text-blue-950 text-xs font-semibold px-4 py-1.5 rounded-full mb-4">Website Resmi Desa Siboro</span>
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
             Selamat Datang di
             <br />
@@ -77,7 +78,12 @@ export default async function Home() {
           <StatCard
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
               </svg>
             }
             value={totalPerangkat ?? 0}
@@ -86,7 +92,12 @@ export default async function Home() {
           <StatCard
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
               </svg>
             }
             value={totalGaleri ?? 0}
@@ -109,13 +120,9 @@ export default async function Home() {
         {profil?.deskripsi && (
           <div className="max-w-5xl mx-auto px-4">
             <div className="text-center mb-12">
-              <span className="inline-block bg-rose-100 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full mb-3">
-                Tentang Kami
-              </span>
+              <span className="inline-block bg-rose-100 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full mb-3">Tentang Kami</span>
               <h2 className="text-3xl md:text-4xl font-bold mt-2">Mengenal Desa Siboro</h2>
-              <p className="text-gray-500 mt-4 max-w-2xl mx-auto">
-                Perjalanan panjang sejarah dan budaya yang membentuk identitas Desa Siboro
-              </p>
+              <p className="text-gray-500 mt-4 max-w-2xl mx-auto">Perjalanan panjang sejarah dan budaya yang membentuk identitas Desa Siboro</p>
               <div className="w-12 h-1 bg-rose-500 mx-auto mt-4 rounded-full" />
             </div>
 
@@ -141,13 +148,9 @@ export default async function Home() {
         <section className="bg-gray-100 py-20">
           <div className="max-w-5xl mx-auto px-4">
             <div className="text-center mb-12">
-              <span className="inline-block bg-rose-100 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full mb-3">
-                Arah Pembangunan Desa
-              </span>
+              <span className="inline-block bg-rose-100 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full mb-3">Arah Pembangunan Desa</span>
               <h2 className="text-3xl md:text-4xl font-bold mt-2">Arah Pembangunan Desa</h2>
-              <p className="text-gray-500 mt-4 max-w-2xl mx-auto">
-                Komitmen kami dalam membangun masa depan yang berkelanjutan
-              </p>
+              <p className="text-gray-500 mt-4 max-w-2xl mx-auto">Komitmen kami dalam membangun masa depan yang berkelanjutan</p>
               <div className="w-12 h-1 bg-rose-500 mx-auto mt-4 rounded-full" />
             </div>
 
@@ -161,9 +164,7 @@ export default async function Home() {
                   </div>
                   <h3 className="font-bold text-xl text-center mb-3">Visi Desa</h3>
                   <div className="w-12 h-1 bg-rose-500 mx-auto mb-5 rounded-full" />
-                  <p className="text-gray-600 italic leading-relaxed text-center">
-                    &ldquo;{profil.visi}&rdquo;
-                  </p>
+                  <p className="text-gray-600 italic leading-relaxed text-center">&ldquo;{profil.visi}&rdquo;</p>
                 </div>
               )}
 
@@ -180,9 +181,7 @@ export default async function Home() {
                     <ol className="space-y-3">
                       {misiList.map((item, idx) => (
                         <li key={idx} className="flex gap-3 items-start">
-                          <span className="flex-shrink-0 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                            {idx + 1}
-                          </span>
+                          <span className="flex-shrink-0 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center text-xs font-bold">{idx + 1}</span>
                           <span className="text-gray-600 leading-relaxed">{item}</span>
                         </li>
                       ))}
@@ -202,9 +201,7 @@ export default async function Home() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12">
             <div>
-              <span className="inline-block bg-rose-100 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full mb-3">
-                Berita Terkini
-              </span>
+              <span className="inline-block bg-rose-100 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full mb-3">Berita Terkini</span>
               <h2 className="text-3xl md:text-4xl font-bold">Berita dan Informasi Desa Terbaru</h2>
               <div className="w-12 h-1 bg-rose-500 mt-4 rounded-full" />
             </div>
@@ -245,9 +242,7 @@ export default async function Home() {
 function StatCard({ icon, value, label }: { icon: React.ReactNode; value: string | number; label: string }) {
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border border-gray-100">
-      <div className="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 mb-3">
-        {icon}
-      </div>
+      <div className="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 mb-3">{icon}</div>
       <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">{value}</p>
       <p className="text-xs md:text-sm text-gray-500">{label}</p>
     </div>
@@ -277,22 +272,20 @@ function BeritaCardHome({
     <Link href={`/berita/${slug}`} className="group block bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
       <div className="relative h-52 overflow-hidden">
         {gambar_url ? (
-          <Image
-            src={gambar_url}
-            alt={judul}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-          />
+          <Image src={gambar_url} alt={judul} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-blue-100 to-amber-100 flex items-center justify-center">
             <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
             </svg>
           </div>
         )}
-        <div className="absolute top-3 left-3 bg-blue-700 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
-          {kategori || "Umum"}
-        </div>
+        <div className="absolute top-3 left-3 bg-blue-700 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">{kategori || "Umum"}</div>
       </div>
 
       <div className="p-5">
@@ -305,15 +298,9 @@ function BeritaCardHome({
           </div>
         )}
 
-        <h3 className="font-bold text-base md:text-lg text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-700 transition-colors leading-snug">
-          {judul}
-        </h3>
+        <h3 className="font-bold text-base md:text-lg text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-700 transition-colors leading-snug">{judul}</h3>
 
-        {isi && (
-          <p className="text-sm text-gray-500 leading-relaxed line-clamp-3 mb-4">
-            {truncate(isi, 100)}
-          </p>
-        )}
+        {isi && <p className="text-sm text-gray-500 leading-relaxed line-clamp-3 mb-4">{truncate(isi, 100)}</p>}
 
         <div className="inline-flex items-center gap-1 text-sm font-semibold text-blue-700 group-hover:text-blue-800 transition-colors">
           Baca Selengkapnya
