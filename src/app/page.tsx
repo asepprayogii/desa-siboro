@@ -1,32 +1,60 @@
 import { createClient } from "@/lib/supabase/server";
-import BeritaCard from "@/components/BeritaCard";
 import Link from "next/link";
 import Image from "next/image";
 
 export default async function Home() {
   const supabase = await createClient();
 
-  const [{ data: beritaTerbaru }, { data: profil }, { count: totalPerangkat }] = await Promise.all([
-    supabase.from("berita").select("judul, slug, gambar_url, kategori, created_at").eq("published", true).order("created_at", { ascending: false }).limit(3),
+  const [{ data: beritaTerbaru }, { data: profil }, { count: totalPerangkat }, { count: totalGaleri }, { data: kategoriData }] = await Promise.all([
+    supabase.from("berita").select("judul, slug, gambar_url, isi, kategori, created_at").eq("published", true).order("created_at", { ascending: false }).limit(3),
     supabase.from("profil_desa").select("*").single(),
     supabase.from("perangkat_desa").select("*", { count: "exact", head: true }),
+    supabase.from("galeri").select("id", { count: "exact", head: true }),
+    supabase.from("berita").select("kategori", { distinct: true }).eq("published", true),
   ]);
+
+  const totalBerita = beritaTerbaru?.length ?? 0;
+  const totalKategori = kategoriData?.length ?? 0;
+
+  const misiList = profil?.misi
+    ? profil.misi
+        .split(/\n+/)
+        .map((line) => line.replace(/^\d+[\.\)\-]\s*/, "").trim())
+        .filter((line) => line.length > 0)
+    : [];
+
+  // Format tanggal Indonesia
+  const formatTanggal = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+  };
+
+  // Truncate text
+  const truncate = (text: string, max: number) => {
+    if (!text) return "";
+    const clean = text.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+    return clean.length > max ? clean.substring(0, max) + "..." : clean;
+  };
 
   return (
     <main>
-      {/* HERO */}
-      <section className="relative h-[85vh] min-h-[500px] flex items-center justify-center text-center overflow-hidden">
+      {/* HERO SECTION */}
+      <section className="relative h-screen min-h-[600px] flex items-center justify-center text-center overflow-hidden">
         <Image src="/hero-desa.jpg" alt="Desa Siboro" fill priority className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
 
         <div className="relative z-10 px-4 max-w-3xl">
-          <span className="inline-block bg-amber-400 text-blue-950 text-xs font-semibold px-4 py-1.5 rounded-full mb-4">Website Resmi Desa Siboro</span>
+          <span className="inline-block bg-amber-400 text-blue-950 text-xs font-semibold px-4 py-1.5 rounded-full mb-4">
+            Website Resmi Desa Siboro
+          </span>
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
             Selamat Datang di
             <br />
             <span className="text-amber-400">Desa Siboro</span>
           </h1>
-          <p className="text-blue-50 text-base md:text-lg mb-8 max-w-xl mx-auto">Desa yang asri di tepian Danau Toba, menjunjung kearifan lokal menuju masa depan yang berkelanjutan.</p>
+          <p className="text-blue-50 text-base md:text-lg mb-8 max-w-xl mx-auto">
+            Desa yang asri di tepian Danau Toba, menjunjung kearifan lokal menuju masa depan yang berkelanjutan.
+          </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/profil" className="bg-amber-400 hover:bg-amber-300 text-blue-950 font-semibold px-6 py-3 rounded-full transition">
               Tentang Desa →
@@ -38,61 +66,134 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* STAT CARDS — mengambang di atas hero */}
-      <section className="max-w-5xl mx-auto px-4 -mt-16 relative z-20">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white rounded-2xl shadow-xl p-6">
-          <StatCard icon="🏘️" value={totalPerangkat ?? 0} label="Perangkat Desa" />
-          <StatCard icon="📰" value={beritaTerbaru?.length ?? 0} label="Berita Terbaru" />
-          <StatCard icon="📍" value="1" label="Desa" />
-          <StatCard icon="🏔️" value="Samosir" label="Kabupaten" />
+      {/* FLOATING STAT CARDS */}
+      <section className="relative z-20 max-w-6xl mx-auto px-4 -mt-12 md:-mt-14">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          <StatCard
+            icon={
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+              </svg>
+            }
+            value={totalBerita}
+            label="Total Berita"
+          />
+          <StatCard
+            icon={
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            }
+            value={totalPerangkat ?? 0}
+            label="Perangkat Desa"
+          />
+          <StatCard
+            icon={
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            }
+            value={totalGaleri ?? 0}
+            label="Dokumentasi"
+          />
+          <StatCard
+            icon={
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
+            }
+            value={totalKategori}
+            label="Kategori Berita"
+          />
         </div>
       </section>
 
-      {/* TENTANG DESA */}
-      {profil?.deskripsi && (
-        <section className="max-w-5xl mx-auto px-4 py-20">
-          <div className="text-center mb-12">
-            <span className="text-blue-700 text-sm font-semibold uppercase tracking-wide">Tentang Kami</span>
-            <h2 className="text-3xl font-bold mt-2">Mengenal Desa Siboro</h2>
-            <div className="w-16 h-1 bg-amber-400 mx-auto mt-4 rounded-full" />
-          </div>
-          <div className="grid md:grid-cols-2 gap-10 items-center">
-            <div className="relative h-72 rounded-2xl overflow-hidden">
-              <Image src="/hero-desa.jpg" alt="Desa Siboro" fill className="object-cover" />
+      {/* SECTION PUTIH - Tentang Desa */}
+      <section className="bg-white pt-28 md:pt-32 pb-20">
+        {profil?.deskripsi && (
+          <div className="max-w-5xl mx-auto px-4">
+            <div className="text-center mb-12">
+              <span className="inline-block bg-rose-100 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                Tentang Kami
+              </span>
+              <h2 className="text-3xl md:text-4xl font-bold mt-2">Mengenal Desa Siboro</h2>
+              <p className="text-gray-500 mt-4 max-w-2xl mx-auto">
+                Perjalanan panjang sejarah dan budaya yang membentuk identitas Desa Siboro
+              </p>
+              <div className="w-12 h-1 bg-rose-500 mx-auto mt-4 rounded-full" />
             </div>
-            <div>
-              <h3 className="text-xl font-bold mb-3">Sejarah & Kearifan Lokal</h3>
-              <p className="text-gray-600 leading-relaxed whitespace-pre-line">{profil.deskripsi}</p>
-              <Link href="/profil" className="inline-block mt-4 text-blue-700 font-semibold">
-                Selengkapnya →
-              </Link>
+
+            <div className="grid md:grid-cols-2 gap-10 items-center">
+              <div className="relative h-80 md:h-96 rounded-2xl overflow-hidden shadow-lg">
+                <Image src="/hero-desa.jpg" alt="Desa Siboro" fill className="object-cover" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold mb-3">Sejarah & Warisan Budaya</h3>
+                <div className="w-12 h-1 bg-rose-500 rounded-full mb-5" />
+                <p className="text-gray-600 leading-relaxed whitespace-pre-line">{profil.deskripsi}</p>
+                <Link href="/profil" className="inline-block mt-6 text-rose-600 font-semibold hover:text-rose-700 transition">
+                  Selengkapnya →
+                </Link>
+              </div>
             </div>
           </div>
-        </section>
-      )}
+        )}
+      </section>
 
       {/* VISI MISI */}
       {(profil?.visi || profil?.misi) && (
-        <section className="bg-gray-50 py-20">
+        <section className="bg-gray-100 py-20">
           <div className="max-w-5xl mx-auto px-4">
             <div className="text-center mb-12">
-              <span className="text-blue-700 text-sm font-semibold uppercase tracking-wide">Arah Pembangunan</span>
-              <h2 className="text-3xl font-bold mt-2">Visi & Misi Desa</h2>
-              <div className="w-16 h-1 bg-amber-400 mx-auto mt-4 rounded-full" />
+              <span className="inline-block bg-rose-100 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                Arah Pembangunan Desa
+              </span>
+              <h2 className="text-3xl md:text-4xl font-bold mt-2">Arah Pembangunan Desa</h2>
+              <p className="text-gray-500 mt-4 max-w-2xl mx-auto">
+                Komitmen kami dalam membangun masa depan yang berkelanjutan
+              </p>
+              <div className="w-12 h-1 bg-rose-500 mx-auto mt-4 rounded-full" />
             </div>
+
             <div className="grid md:grid-cols-2 gap-6">
               {profil?.visi && (
-                <div className="bg-white rounded-2xl p-8 shadow-sm">
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-2xl mb-4">🎯</div>
-                  <h3 className="font-bold text-lg mb-3">Visi Desa</h3>
-                  <p className="text-gray-600 italic leading-relaxed">&ldquo;{profil.visi}&rdquo;</p>
+                <div className="bg-white rounded-2xl p-8 md:p-10 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="w-14 h-14 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-5">
+                    <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="font-bold text-xl text-center mb-3">Visi Desa</h3>
+                  <div className="w-12 h-1 bg-rose-500 mx-auto mb-5 rounded-full" />
+                  <p className="text-gray-600 italic leading-relaxed text-center">
+                    &ldquo;{profil.visi}&rdquo;
+                  </p>
                 </div>
               )}
+
               {profil?.misi && (
-                <div className="bg-white rounded-2xl p-8 shadow-sm">
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-2xl mb-4">📋</div>
-                  <h3 className="font-bold text-lg mb-3">Misi Desa</h3>
-                  <p className="text-gray-600 leading-relaxed whitespace-pre-line">{profil.misi}</p>
+                <div className="bg-white rounded-2xl p-8 md:p-10 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="w-14 h-14 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-5">
+                    <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                  </div>
+                  <h3 className="font-bold text-xl text-center mb-3">Misi Desa</h3>
+                  <div className="w-12 h-1 bg-rose-500 mx-auto mb-5 rounded-full" />
+                  {misiList.length > 0 ? (
+                    <ol className="space-y-3">
+                      {misiList.map((item, idx) => (
+                        <li key={idx} className="flex gap-3 items-start">
+                          <span className="flex-shrink-0 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                            {idx + 1}
+                          </span>
+                          <span className="text-gray-600 leading-relaxed">{item}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  ) : (
+                    <p className="text-gray-600 leading-relaxed whitespace-pre-line">{profil.misi}</p>
+                  )}
                 </div>
               )}
             </div>
@@ -100,27 +201,37 @@ export default async function Home() {
         </section>
       )}
 
-      {/* BERITA TERBARU */}
-      <section className="max-w-6xl mx-auto px-4 py-20">
-        <div className="flex items-center justify-between mb-10">
-          <div>
-            <span className="text-blue-700 text-sm font-semibold uppercase tracking-wide">Berita Terkini</span>
-            <h2 className="text-3xl font-bold mt-2">Kabar Terbaru Desa Siboro</h2>
+      {/* BERITA TERBARU - Redesigned */}
+      <section className="bg-white py-20">
+        <div className="max-w-6xl mx-auto px-4">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12">
+            <div>
+              <span className="inline-block bg-rose-100 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                Berita Terkini
+              </span>
+              <h2 className="text-3xl md:text-4xl font-bold">Berita dan Informasi Desa Terbaru</h2>
+              <div className="w-12 h-1 bg-rose-500 mt-4 rounded-full" />
+            </div>
+            <Link href="/berita" className="inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-5 py-2.5 rounded-full text-sm font-medium transition self-start md:self-auto">
+              Lihat Semua Berita
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
           </div>
-          <Link href="/berita" className="hidden sm:inline-block bg-blue-700 hover:bg-blue-800 text-white px-5 py-2.5 rounded-full text-sm font-medium transition">
-            Lihat Semua Berita →
-          </Link>
-        </div>
 
-        {beritaTerbaru && beritaTerbaru.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {beritaTerbaru.map((b) => (
-              <BeritaCard key={b.slug} {...b} />
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-400 text-center py-10">Belum ada berita yang dipublikasikan.</p>
-        )}
+          {/* Grid Berita */}
+          {beritaTerbaru && beritaTerbaru.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {beritaTerbaru.map((b) => (
+                <BeritaCardHome key={b.slug} {...b} formatTanggal={formatTanggal} truncate={truncate} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-400 text-center py-10">Belum ada berita yang dipublikasikan.</p>
+          )}
+        </div>
       </section>
 
       {/* CTA */}
@@ -137,12 +248,94 @@ export default async function Home() {
   );
 }
 
-function StatCard({ icon, value, label }: { icon: string; value: string | number; label: string }) {
+function StatCard({ icon, value, label }: { icon: React.ReactNode; value: string | number; label: string }) {
   return (
-    <div className="text-center">
-      <div className="text-2xl mb-1">{icon}</div>
-      <p className="text-2xl font-bold text-blue-900">{value}</p>
-      <p className="text-xs text-gray-500 mt-1">{label}</p>
+    <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border border-gray-100">
+      <div className="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 mb-3">
+        {icon}
+      </div>
+      <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">{value}</p>
+      <p className="text-xs md:text-sm text-gray-500">{label}</p>
     </div>
+  );
+}
+
+// Berita Card khusus Homepage (mirip screenshot Desa Blarang)
+function BeritaCardHome({
+  judul,
+  slug,
+  gambar_url,
+  isi,
+  kategori,
+  created_at,
+  formatTanggal,
+  truncate,
+}: {
+  judul: string;
+  slug: string;
+  gambar_url: string | null;
+  isi: string | null;
+  kategori: string | null;
+  created_at: string | null;
+  formatTanggal: (date: string) => string;
+  truncate: (text: string, max: number) => string;
+}) {
+  return (
+    <Link href={`/berita/${slug}`} className="group block bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
+      {/* Gambar */}
+      <div className="relative h-52 overflow-hidden">
+        {gambar_url ? (
+          <Image
+            src={gambar_url}
+            alt={judul}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-blue-100 to-amber-100 flex items-center justify-center">
+            <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+        )}
+        {/* Badge Kategori di pojok kiri atas gambar */}
+        <div className="absolute top-3 left-3 bg-blue-700 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+          {kategori || "Umum"}
+        </div>
+      </div>
+
+      {/* Konten */}
+      <div className="p-5">
+        {/* Tanggal */}
+        {created_at && (
+          <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-2">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span>{formatTanggal(created_at)}</span>
+          </div>
+        )}
+
+        {/* Judul */}
+        <h3 className="font-bold text-base md:text-lg text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-700 transition-colors leading-snug">
+          {judul}
+        </h3>
+
+        {/* Deskripsi singkat */}
+        {isi && (
+          <p className="text-sm text-gray-500 leading-relaxed line-clamp-3 mb-4">
+            {truncate(isi, 100)}
+          </p>
+        )}
+
+        {/* Link Baca Selengkapnya */}
+        <div className="inline-flex items-center gap-1 text-sm font-semibold text-blue-700 group-hover:text-blue-800 transition-colors">
+          Baca Selengkapnya
+          <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </div>
+      </div>
+    </Link>
   );
 }
