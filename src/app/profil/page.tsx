@@ -1,26 +1,23 @@
-import { createClient } from '@/lib/supabase/server'
-import { Metadata } from 'next'
-import Image from 'next/image'
+import { createClient } from "@/lib/supabase/server";
+import { Metadata } from "next";
+import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: 'Profil Desa Siboro - Sejarah, Visi & Misi',
-  description: 'Profil lengkap Desa Siboro, Kecamatan Sianjur Simula, Kabupaten Samosir: sejarah, visi, misi, dan deskripsi desa.',
-}
+  title: "Profil Desa Siboro - Sejarah, Visi & Misi",
+  description: "Profil lengkap Desa Siboro, Kecamatan Sianjur Simula, Kabupaten Samosir: sejarah, visi, misi, dan deskripsi desa.",
+};
 
 export default async function ProfilPage() {
-  const supabase = await createClient()
+  const supabase = await createClient();
 
-  const { data: profil } = await supabase
-    .from('profil_desa')
-    .select('*')
-    .single()
+  const { data: profil } = await supabase.from("profil_desa").select("*").single();
 
   const misiList = profil?.misi
     ? profil.misi
         .split(/\n+/)
-        .map((line) => line.replace(/^\d+[\.\)\-]\s*/, "").trim())
-        .filter((line) => line.length > 0)
-    : []
+        .map((line: string) => line.replace(/^\d+[\.\)\-]\s*/, "").trim())
+        .filter((line: string) => line.length > 0)
+    : [];
 
   return (
     <main>
@@ -28,9 +25,7 @@ export default async function ProfilPage() {
       <section className="bg-white py-20">
         <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-12">
-            <span className="inline-block bg-rose-100 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full mb-3">
-              Sejarah
-            </span>
+            <span className="inline-block bg-rose-100 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full mb-3">Sejarah</span>
             <h2 className="text-3xl md:text-4xl font-bold">Perjalanan Desa Siboro</h2>
             <div className="w-12 h-1 bg-rose-500 mx-auto mt-4 rounded-full" />
           </div>
@@ -41,9 +36,7 @@ export default async function ProfilPage() {
             </div>
             <div>
               <div className="bg-gray-50 rounded-2xl p-8">
-                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                  {profil?.sejarah || 'Belum ada data sejarah.'}
-                </p>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">{profil?.sejarah || "Belum ada data sejarah."}</p>
               </div>
             </div>
           </div>
@@ -54,13 +47,9 @@ export default async function ProfilPage() {
       <section className="bg-gray-100 py-20">
         <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-12">
-            <span className="inline-block bg-rose-100 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full mb-3">
-              Arah Pembangunan
-            </span>
+            <span className="inline-block bg-rose-100 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full mb-3">Arah Pembangunan</span>
             <h2 className="text-3xl md:text-4xl font-bold">Visi & Misi Desa</h2>
-            <p className="text-gray-500 mt-4 max-w-2xl mx-auto">
-              Komitmen kami dalam membangun masa depan yang berkelanjutan
-            </p>
+            <p className="text-gray-500 mt-4 max-w-2xl mx-auto">Komitmen kami dalam membangun masa depan yang berkelanjutan</p>
             <div className="w-12 h-1 bg-rose-500 mx-auto mt-4 rounded-full" />
           </div>
 
@@ -75,9 +64,7 @@ export default async function ProfilPage() {
               </div>
               <h3 className="font-bold text-xl text-center mb-3">Visi Desa</h3>
               <div className="w-12 h-1 bg-blue-500 mx-auto mb-5 rounded-full" />
-              <p className="text-gray-600 italic leading-relaxed text-center">
-                &ldquo;{profil?.visi || 'Belum ada data visi.'}&rdquo;
-              </p>
+              <p className="text-gray-600 italic leading-relaxed text-center">&ldquo;{profil?.visi || "Belum ada data visi."}&rdquo;</p>
             </div>
 
             {/* MISI */}
@@ -93,17 +80,13 @@ export default async function ProfilPage() {
                 <ol className="space-y-3">
                   {misiList.map((item, idx) => (
                     <li key={idx} className="flex gap-3 items-start">
-                      <span className="flex-shrink-0 w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                        {idx + 1}
-                      </span>
+                      <span className="flex-shrink-0 w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold">{idx + 1}</span>
                       <span className="text-gray-600 leading-relaxed">{item}</span>
                     </li>
                   ))}
                 </ol>
               ) : (
-                <p className="text-gray-600 leading-relaxed whitespace-pre-line">
-                  {profil?.misi || 'Belum ada data misi.'}
-                </p>
+                <p className="text-gray-600 leading-relaxed whitespace-pre-line">{profil?.misi || "Belum ada data misi."}</p>
               )}
             </div>
           </div>
@@ -114,22 +97,18 @@ export default async function ProfilPage() {
       <section className="bg-white py-20">
         <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-12">
-            <span className="inline-block bg-rose-100 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full mb-3">
-              Informasi Desa
-            </span>
+            <span className="inline-block bg-rose-100 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full mb-3">Informasi Desa</span>
             <h2 className="text-3xl md:text-4xl font-bold">Deskripsi Umum</h2>
             <div className="w-12 h-1 bg-rose-500 mx-auto mt-4 rounded-full" />
           </div>
 
           <div className="bg-gradient-to-br from-blue-50 to-amber-50 rounded-2xl p-8 md:p-12 shadow-sm">
             <div className="max-w-3xl mx-auto">
-              <p className="text-gray-700 leading-relaxed whitespace-pre-line text-center text-lg">
-                {profil?.deskripsi || 'Belum ada data deskripsi.'}
-              </p>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-line text-center text-lg">{profil?.deskripsi || "Belum ada data deskripsi."}</p>
             </div>
           </div>
         </div>
       </section>
     </main>
-  )
+  );
 }
