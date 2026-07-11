@@ -337,5 +337,5 @@ function BeritaCardHome({
         </div>
       </div>
     </Link>
-  );
-}
+  ); 
+} 
