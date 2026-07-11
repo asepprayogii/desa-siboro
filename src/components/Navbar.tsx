@@ -18,20 +18,30 @@ export default function Navbar() {
   const pathname = usePathname()
 
   return (
-    <nav className="bg-blue-700 text-white sticky top-0 z-50 shadow-md">
+    <nav className="bg-white/95 backdrop-blur sticky top-0 z-50 shadow-sm">
       <div className="max-w-6xl mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <Link href="/" className="font-bold text-lg">
-            Desa Siboro
+        <div className="flex items-center justify-between h-18 py-3">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-800 rounded-full flex items-center justify-center text-white font-bold text-sm">
+              DS
+            </div>
+            <div>
+              <p className="font-bold text-blue-950 leading-tight">Desa Siboro</p>
+              <p className="text-[11px] text-gray-500 leading-tight">Kec. Sianjur Simula, Kab. Samosir</p>
+            </div>
           </Link>
 
           {/* Menu Desktop */}
-          <div className="hidden md:flex gap-6">
+          <div className="hidden md:flex items-center gap-1">
             {menuItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`text-sm ${pathname === item.href ? 'font-semibold border-b-2 border-white' : 'text-blue-100'}`}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+                  pathname === item.href
+                    ? 'bg-blue-800 text-white'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
               >
                 {item.label}
               </Link>
@@ -41,7 +51,7 @@ export default function Navbar() {
           {/* Tombol Menu Mobile */}
           <button
             onClick={() => setOpen(!open)}
-            className="md:hidden text-2xl"
+            className="md:hidden text-2xl text-blue-950"
             aria-label="Menu"
           >
             {open ? '✕' : '☰'}
@@ -50,13 +60,17 @@ export default function Navbar() {
 
         {/* Menu Mobile Dropdown */}
         {open && (
-          <div className="md:hidden pb-4 flex flex-col gap-3">
+          <div className="md:hidden pb-4 flex flex-col gap-1">
             {menuItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className={`text-sm ${pathname === item.href ? 'font-semibold' : 'text-blue-100'}`}
+                className={`px-4 py-2.5 rounded-lg text-sm font-medium ${
+                  pathname === item.href
+                    ? 'bg-blue-800 text-white'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
               >
                 {item.label}
               </Link>
