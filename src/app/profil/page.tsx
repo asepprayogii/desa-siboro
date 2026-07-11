@@ -12,7 +12,7 @@ export default async function ProfilPage() {
 
   const { data: profil } = await supabase.from("profil_desa").select("*").single();
 
-  const misiList = profil?.misi
+  const misiList: string[] = profil?.misi
     ? profil.misi
         .split(/\n+/)
         .map((line: string) => line.replace(/^\d+[\.\)\-]\s*/, "").trim())
@@ -86,7 +86,7 @@ export default async function ProfilPage() {
               <div className="w-10 h-0.5 bg-gray-200 mx-auto mb-5" />
               {misiList.length > 0 ? (
                 <ol className="space-y-3">
-                  {misiList.map((item, idx) => (
+                  {misiList.map((item: string, idx: number) => (
                     <li key={idx} className="flex gap-3 items-start">
                       <span className="flex-shrink-0 w-5 h-5 bg-blue-700 text-white rounded-full flex items-center justify-center text-[11px] font-bold mt-0.5">
                         {idx + 1}
