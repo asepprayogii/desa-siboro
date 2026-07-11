@@ -5,16 +5,19 @@ import Image from "next/image";
 export default async function Home() {
   const supabase = await createClient();
 
-  const [{ data: beritaTerbaru }, { data: profil }, { count: totalPerangkat }, { count: totalGaleri }, { data: kategoriData }] = await Promise.all([
+  const [{ data: beritaTerbaru }, { data: profil }, { count: totalPerangkat }, { count: totalGaleri }, { data: allKategori }] = await Promise.all([
     supabase.from("berita").select("judul, slug, gambar_url, isi, kategori, created_at").eq("published", true).order("created_at", { ascending: false }).limit(3),
     supabase.from("profil_desa").select("*").single(),
     supabase.from("perangkat_desa").select("*", { count: "exact", head: true }),
     supabase.from("galeri").select("id", { count: "exact", head: true }),
-    supabase.from("berita").select("kategori", { distinct: true }).eq("published", true),
+    supabase.from("berita").select("kategori").eq("published", true), // ✅ Hapus { distinct: true }
   ]);
 
   const totalBerita = beritaTerbaru?.length ?? 0;
-  const totalKategori = kategoriData?.length ?? 0;
+  
+  // ✅ Hitung kategori unik dengan Set
+  const uniqueKategori = new Set(allKategori?.map((b) => b.kategori).filter(Boolean));
+  const totalKategori = uniqueKategori.size;
 
   const misiList = profil?.misi
     ? profil.misi
@@ -337,5 +340,5 @@ function BeritaCardHome({
         </div>
       </div>
     </Link>
-  ); 
-} 
+  );
+}
