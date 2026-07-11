@@ -13,17 +13,29 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          response = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          )
+          try {
+            cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+            response = NextResponse.next({ request })
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options)
+            )
+          } catch (error) {
+            // Ignore error saat build time
+          }
         },
       },
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  // ✅ Wrap getUser dengan try-catch untuk handle build time
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data?.user ?? null
+  } catch (error) {
+    // Ignore error saat build time atau tidak ada session
+    user = null
+  }
 
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
   const isLoginPage = request.nextUrl.pathname === '/admin/login'
