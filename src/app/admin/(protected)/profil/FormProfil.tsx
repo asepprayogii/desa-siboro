@@ -10,6 +10,7 @@ interface FormProfilProps {
     visi: string | null
     misi: string | null
     deskripsi: string | null
+    sambutan_kades: string | null
   }
 }
 
@@ -18,6 +19,7 @@ export default function FormProfil({ initialData }: FormProfilProps) {
   const [visi, setVisi] = useState(initialData.visi || '')
   const [misi, setMisi] = useState(initialData.misi || '')
   const [deskripsi, setDeskripsi] = useState(initialData.deskripsi || '')
+  const [sambutanKades, setSambutanKades] = useState(initialData.sambutan_kades || '')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
 
@@ -31,7 +33,13 @@ export default function FormProfil({ initialData }: FormProfilProps) {
 
     const { error } = await supabase
       .from('profil_desa')
-      .update({ sejarah, visi, misi, deskripsi })
+      .update({
+        sejarah,
+        visi,
+        misi,
+        deskripsi,
+        sambutan_kades: sambutanKades,
+      })
       .eq('id', 1)
 
     if (error) {
@@ -85,6 +93,19 @@ export default function FormProfil({ initialData }: FormProfilProps) {
           value={misi}
           onChange={(e) => setMisi(e.target.value)}
           rows={4}
+          className="w-full border rounded-md px-3 py-2"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          Sambutan Kepala Desa <span className="text-gray-400">(tampil di Beranda, kosongkan jika belum ada)</span>
+        </label>
+        <textarea
+          value={sambutanKades}
+          onChange={(e) => setSambutanKades(e.target.value)}
+          rows={5}
+          placeholder="Tulis kata sambutan dari Kepala Desa di sini..."
           className="w-full border rounded-md px-3 py-2"
         />
       </div>

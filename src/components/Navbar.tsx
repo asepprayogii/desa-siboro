@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 
@@ -10,7 +11,6 @@ const menuItems = [
   { href: '/struktur', label: 'Struktur' },
   { href: '/berita', label: 'Berita' },
   { href: '/galeri', label: 'Galeri' },
-  { href: '/kontak', label: 'Kontak' },
 ]
 
 export default function Navbar() {
@@ -19,11 +19,11 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white/95 backdrop-blur sticky top-0 z-50 shadow-sm">
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="max-w-6xl mx-auto px-4 relative">
         <div className="flex items-center justify-between h-18 py-3">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-800 rounded-full flex items-center justify-center text-white font-bold text-sm">
-              DS
+            <div className="w-10 h-10 rounded-xl overflow-hidden bg-white border border-gray-100 flex-shrink-0 relative">
+              <Image src="/logo-desa.png" alt="Logo Desa Siboro" fill className="object-contain p-1" />
             </div>
             <div>
               <p className="font-bold text-blue-950 leading-tight">Desa Siboro</p>
@@ -31,7 +31,6 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Menu Desktop */}
           <div className="hidden md:flex items-center gap-1">
             {menuItems.map((item) => (
               <Link
@@ -48,7 +47,6 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Tombol Menu Mobile */}
           <button
             onClick={() => setOpen(!open)}
             className="md:hidden text-2xl text-blue-950"
@@ -58,9 +56,9 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Menu Mobile Dropdown */}
+        {/* Dropdown mobile - absolute, jadi overlay, bukan dorong konten */}
         {open && (
-          <div className="md:hidden pb-4 flex flex-col gap-1">
+          <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-lg border-t border-gray-100 rounded-b-2xl px-4 py-4 flex flex-col gap-1">
             {menuItems.map((item) => (
               <Link
                 key={item.href}

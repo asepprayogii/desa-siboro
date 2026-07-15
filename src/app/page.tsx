@@ -5,17 +5,24 @@ import Image from "next/image";
 export default async function Home() {
   const supabase = await createClient();
 
-  const [{ data: beritaTerbaru }, { data: profil }, { count: totalPerangkat }, { count: totalGaleri }, { data: allKategori }] = await Promise.all([
+  const [
+    { data: beritaTerbaru },
+    { data: profil },
+    { count: totalPerangkat },
+    { count: totalGaleri },
+    { data: perangkat },
+    { data: galeriPreview },
+  ] = await Promise.all([
     supabase.from("berita").select("judul, slug, gambar_url, isi, kategori, created_at").eq("published", true).order("created_at", { ascending: false }).limit(3),
     supabase.from("profil_desa").select("*").single(),
     supabase.from("perangkat_desa").select("*", { count: "exact", head: true }),
     supabase.from("galeri").select("id", { count: "exact", head: true }),
-    supabase.from("berita").select("kategori").eq("published", true),
+    supabase.from("perangkat_desa").select("*").order("urutan", { ascending: true }),
+    supabase.from("galeri").select("id, gambar_url, keterangan").order("created_at", { ascending: false }).limit(4),
   ]);
 
   const totalBerita = beritaTerbaru?.length ?? 0;
-  const uniqueKategori = new Set(allKategori?.map((b: { kategori: string | null }) => b.kategori).filter(Boolean));
-  const totalKategori = uniqueKategori.size;
+  const kepalaDesa = perangkat?.[0];
 
   const misiList: string[] = profil?.misi
     ? profil.misi
@@ -56,8 +63,8 @@ export default async function Home() {
             <Link href="/profil" className="bg-amber-400 hover:bg-amber-300 text-blue-950 font-semibold px-6 py-3 rounded-full transition">
               Tentang Desa →
             </Link>
-            <Link href="/kontak" className="bg-white/10 hover:bg-white/20 backdrop-blur text-white font-semibold px-6 py-3 rounded-full border border-white/30 transition">
-              Hubungi Kami
+            <Link href="/berita" className="bg-white/10 hover:bg-white/20 backdrop-blur text-white font-semibold px-6 py-3 rounded-full border border-white/30 transition">
+              Lihat Berita
             </Link>
           </div>
         </div>
@@ -96,21 +103,26 @@ export default async function Home() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
+                  d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-4a4 4 0 10-4-4 4 4 0 004 4zm6 0a4 4 0 10-4-4"
+                />
+              </svg>
+            }
+            value="1.022"
+            label="Jumlah Penduduk"
+          />
+          <StatCard
+            icon={
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
                   d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
             }
             value={totalGaleri ?? 0}
             label="Dokumentasi"
-          />
-          <StatCard
-            icon={
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-              </svg>
-            }
-            value={totalKategori}
-            label="Kategori Berita"
           />
         </div>
       </section>
@@ -142,6 +154,42 @@ export default async function Home() {
           </div>
         )}
       </section>
+
+      {/* SAMBUTAN KEPALA DESA */}
+      {profil?.sambutan_kades && kepalaDesa && (
+        <section className="bg-rose-50 py-20">
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="text-center mb-10">
+              <span className="inline-block bg-rose-100 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full mb-3">Kata Sambutan</span>
+              <h2 className="text-3xl md:text-4xl font-bold mt-2">Sambutan Kepala Desa</h2>
+              <div className="w-12 h-1 bg-rose-500 mx-auto mt-4 rounded-full" />
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-10">
+              <div className="flex flex-col sm:flex-row gap-6 items-start">
+                <div className="relative w-24 h-24 rounded-full overflow-hidden flex-shrink-0 mx-auto sm:mx-0 ring-4 ring-rose-50">
+                  {kepalaDesa.foto_url ? (
+                    <Image src={kepalaDesa.foto_url} alt={kepalaDesa.nama} fill className="object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-rose-50 flex items-center justify-center">
+                      <svg className="w-10 h-10 text-rose-200" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-3.866 0-7 2.239-7 5v2h14v-2c0-2.761-3.134-5-7-5z" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <p className="text-gray-600 italic leading-relaxed whitespace-pre-line mb-4">
+                    &ldquo;{profil.sambutan_kades}&rdquo;
+                  </p>
+                  <p className="font-bold text-gray-900">{kepalaDesa.nama}</p>
+                  <p className="text-sm text-rose-600">{kepalaDesa.jabatan}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* VISI MISI */}
       {(profil?.visi || profil?.misi) && (
@@ -196,8 +244,30 @@ export default async function Home() {
         </section>
       )}
 
-      {/* BERITA TERBARU */}
+      {/* PETA LOKASI - statis, tepat sebelum Berita */}
       <section className="bg-white py-20">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="text-center mb-10">
+            <span className="inline-block bg-rose-100 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full mb-3">Lokasi</span>
+            <h2 className="text-3xl md:text-4xl font-bold mt-2">Peta Lokasi Desa Siboro</h2>
+            <div className="w-12 h-1 bg-rose-500 mx-auto mt-4 rounded-full" />
+          </div>
+          <div className="w-full h-80 md:h-96 rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31884.964533187904!2d98.62806483970488!3d2.6284978803542494!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3031cf77fdefa431%3A0x6b8e82e1df402d55!2sSiboro%2C%20Kec.%20Sianjur%20Mula%20Mula%2C%20Kabupaten%20Samosir%2C%20Sumatera%20Utara!5e0!3m2!1sid!2sid!4v1784096395501!5m2!1sid!2sid"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* BERITA TERBARU */}
+      <section className="bg-gray-50 py-20">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12">
             <div>
@@ -225,13 +295,50 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* GALERI PREVIEW */}
+      {galeriPreview && galeriPreview.length > 0 && (
+        <section className="bg-white py-20">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12">
+              <div>
+                <span className="inline-block bg-rose-100 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full mb-3">Dokumentasi</span>
+                <h2 className="text-3xl md:text-4xl font-bold">Galeri Desa</h2>
+                <div className="w-12 h-1 bg-rose-500 mt-4 rounded-full" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {galeriPreview.map((g) => (
+                <div key={g.id} className="relative aspect-square rounded-2xl overflow-hidden">
+                  <Image
+                    src={g.gambar_url}
+                    alt={g.keterangan || "Galeri Desa Siboro"}
+                    fill
+                    className="object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="text-center mt-8">
+              <Link href="/galeri" className="inline-flex items-center gap-2 text-rose-600 font-semibold hover:text-rose-700 transition">
+                Lihat Seluruh Galeri
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* CTA */}
       <section className="bg-blue-800 py-16">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Mari Bersama Membangun Desa</h2>
           <p className="text-blue-100 mb-8">Bergabunglah bersama kami memajukan Desa Siboro. Suara dan partisipasi Anda berarti bagi masa depan desa.</p>
-          <Link href="/kontak" className="inline-block bg-amber-400 hover:bg-amber-300 text-blue-950 font-semibold px-8 py-3 rounded-full transition">
-            Hubungi Kami →
+          <Link href="/berita" className="inline-block bg-amber-400 hover:bg-amber-300 text-blue-950 font-semibold px-8 py-3 rounded-full transition">
+            Lihat Berita Terbaru →
           </Link>
         </div>
       </section>

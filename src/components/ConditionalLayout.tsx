@@ -1,10 +1,16 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import Navbar from './Navbar'
-import Footer from './Footer'
 
-export default function ConditionalLayout({ children }: { children: React.ReactNode }) {
+export default function ConditionalLayout({
+  navbar,
+  footer,
+  children,
+}: {
+  navbar: React.ReactNode
+  footer: React.ReactNode
+  children: React.ReactNode
+}) {
   const pathname = usePathname()
   const isAdminRoute = pathname.startsWith('/admin')
 
@@ -14,9 +20,9 @@ export default function ConditionalLayout({ children }: { children: React.ReactN
 
   return (
     <>
-      <Navbar />
+      {navbar}
       {children}
-      <Footer />
+      {footer}
     </>
   )
 }

@@ -45,8 +45,60 @@ export default async function ProfilPage() {
         </div>
       </section>
 
-      {/* VISI & MISI */}
+      {/* DATA WILAYAH & LOKASI */}
       <section className="bg-gray-50 py-20">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <span className="inline-block bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-3">
+              Data Wilayah
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Lokasi & Wilayah Desa</h2>
+            <div className="w-12 h-1 bg-blue-700 mx-auto mt-4 rounded-full" />
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-white rounded-2xl p-8 border border-gray-100">
+              <dl className="space-y-4">
+                <div className="flex justify-between border-b border-gray-100 pb-3">
+                  <dt className="text-gray-500 text-sm">Desa</dt>
+                  <dd className="font-semibold text-gray-900 text-sm">Siboro</dd>
+                </div>
+                <div className="flex justify-between border-b border-gray-100 pb-3">
+                  <dt className="text-gray-500 text-sm">Kecamatan</dt>
+                  <dd className="font-semibold text-gray-900 text-sm">Sianjur Simula</dd>
+                </div>
+                <div className="flex justify-between border-b border-gray-100 pb-3">
+                  <dt className="text-gray-500 text-sm">Kabupaten</dt>
+                  <dd className="font-semibold text-gray-900 text-sm">Samosir</dd>
+                </div>
+                <div className="flex justify-between border-b border-gray-100 pb-3">
+                  <dt className="text-gray-500 text-sm">Provinsi</dt>
+                  <dd className="font-semibold text-gray-900 text-sm">Sumatera Utara</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-gray-500 text-sm">Luas Wilayah</dt>
+                  <dd className="font-semibold text-gray-900 text-sm">7,25 km²</dd>
+                </div>
+              </dl>
+            </div>
+
+            <div className="rounded-2xl overflow-hidden border border-gray-100 min-h-[280px]">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31884.964533187904!2d98.62806483970488!3d2.6284978803542494!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3031cf77fdefa431%3A0x6b8e82e1df402d55!2sSiboro%2C%20Kec.%20Sianjur%20Mula%20Mula%2C%20Kabupaten%20Samosir%2C%20Sumatera%20Utara!5e0!3m2!1sid!2sid!4v1784096395501!5m2!1sid!2sid"
+                width="100%"
+                height="100%"
+                style={{ border: 0, minHeight: 280 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* VISI & MISI */}
+      <section className="bg-white py-20">
         <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-12">
             <span className="inline-block bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-3">
@@ -61,7 +113,7 @@ export default async function ProfilPage() {
 
           <div className="grid md:grid-cols-2 gap-6">
             {/* VISI */}
-            <div className="bg-white rounded-2xl p-8 md:p-10 shadow-sm border border-gray-100">
+            <div className="bg-gray-50 rounded-2xl p-8 md:p-10 border border-gray-100">
               <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-5">
                 <svg className="w-6 h-6 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -76,7 +128,7 @@ export default async function ProfilPage() {
             </div>
 
             {/* MISI */}
-            <div className="bg-white rounded-2xl p-8 md:p-10 shadow-sm border border-gray-100">
+            <div className="bg-gray-50 rounded-2xl p-8 md:p-10 border border-gray-100">
               <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-5">
                 <svg className="w-6 h-6 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -106,7 +158,7 @@ export default async function ProfilPage() {
       </section>
 
       {/* DESKRIPSI UMUM */}
-      <section className="bg-white py-20">
+      <section className="bg-gray-50 py-20">
         <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-12">
             <span className="inline-block bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-3">
@@ -116,7 +168,7 @@ export default async function ProfilPage() {
             <div className="w-12 h-1 bg-blue-700 mx-auto mt-4 rounded-full" />
           </div>
 
-          <div className="bg-gray-50 rounded-2xl p-8 md:p-12 border border-gray-100">
+          <div className="bg-white rounded-2xl p-8 md:p-12 border border-gray-100">
             <div className="max-w-3xl mx-auto">
               <p className="text-gray-600 leading-relaxed whitespace-pre-line text-center text-lg">
                 {profil?.deskripsi || "Belum ada data deskripsi."}
