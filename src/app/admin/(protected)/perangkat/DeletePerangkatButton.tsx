@@ -21,7 +21,7 @@ export default function DeletePerangkatButton({ id }: { id: string }) {
   }
 
   return (
-    <button onClick={handleDelete} className="text-red-600 text-sm">
+    <button onClick={handleDelete} className="text-red-600 font-medium hover:text-red-700">
       Hapus
     </button>
   )
