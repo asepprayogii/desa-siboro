@@ -1,0 +1,9 @@
+{
+  "name": "Desa Siboro",
+  "short_name": "Desa Siboro",
+  "description": "Website resmi Desa Siboro, Kecamatan Sianjur Mula-Mula, Kabupaten Samosir.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1d4ed8"
+}

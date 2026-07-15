@@ -29,7 +29,7 @@ export default function KontakViewEdit({ initialData }: { initialData: KontakDat
 
   return (
     <div>
-      <div className="flex justify-end mb-6">
+      <div className="flex justify-end mb-4">
         <button onClick={() => setEditing(true)} className="flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -38,9 +38,9 @@ export default function KontakViewEdit({ initialData }: { initialData: KontakDat
         </button>
       </div>
 
-      <div className="space-y-5">
-        <div className="border-b border-gray-100 pb-5">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Alamat</p>
+      <div className="space-y-4">
+        <div className="border-b border-gray-100 pb-4">
+          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-2">Alamat</p>
           {initialData.alamat ? <p className="text-sm text-gray-700">{initialData.alamat}</p> : <p className="text-sm text-gray-300 italic">Belum diisi</p>}
         </div>
         <div>
