@@ -5,14 +5,7 @@ import Image from "next/image";
 export default async function Home() {
   const supabase = await createClient();
 
-  const [
-    { data: beritaTerbaru },
-    { data: profil },
-    { count: totalPerangkat },
-    { count: totalGaleri },
-    { data: perangkat },
-    { data: galeriPreview },
-  ] = await Promise.all([
+  const [{ data: beritaTerbaru }, { data: profil }, { count: totalPerangkat }, { count: totalGaleri }, { data: perangkat }, { data: galeriPreview }] = await Promise.all([
     supabase.from("berita").select("judul, slug, gambar_url, isi, kategori, created_at").eq("published", true).order("created_at", { ascending: false }).limit(3),
     supabase.from("profil_desa").select("*").single(),
     supabase.from("perangkat_desa").select("*", { count: "exact", head: true }),
@@ -48,7 +41,7 @@ export default async function Home() {
   return (
     <main>
       {/* HERO SECTION */}
-      <section className="relative h-screen min-h-[600px] flex items-center justify-center text-center overflow-hidden">
+      <section className="relative min-h-[calc(100vh-4.5rem)] flex items-center justify-center text-center overflow-hidden">
         <Image src="/hero-desa.jpg" alt="Desa Siboro" fill priority className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
 
@@ -99,12 +92,7 @@ export default async function Home() {
           <StatCard
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-4a4 4 0 10-4-4 4 4 0 004 4zm6 0a4 4 0 10-4-4"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-4a4 4 0 10-4-4 4 4 0 004 4zm6 0a4 4 0 10-4-4" />
               </svg>
             }
             value="1.022"
@@ -179,9 +167,7 @@ export default async function Home() {
                   )}
                 </div>
                 <div>
-                  <p className="text-gray-600 italic leading-relaxed whitespace-pre-line mb-4">
-                    &ldquo;{profil.sambutan_kades}&rdquo;
-                  </p>
+                  <p className="text-gray-600 italic leading-relaxed whitespace-pre-line mb-4">&ldquo;{profil.sambutan_kades}&rdquo;</p>
                   <p className="font-bold text-gray-900">{kepalaDesa.nama}</p>
                   <p className="text-sm text-rose-600">{kepalaDesa.jabatan}</p>
                 </div>
@@ -310,12 +296,7 @@ export default async function Home() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {galeriPreview.map((g) => (
                 <div key={g.id} className="relative aspect-square rounded-2xl overflow-hidden">
-                  <Image
-                    src={g.gambar_url}
-                    alt={g.keterangan || "Galeri Desa Siboro"}
-                    fill
-                    className="object-cover hover:scale-105 transition-transform duration-300"
-                  />
+                  <Image src={g.gambar_url} alt={g.keterangan || "Galeri Desa Siboro"} fill className="object-cover hover:scale-105 transition-transform duration-300" />
                 </div>
               ))}
             </div>

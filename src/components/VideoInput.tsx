@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import FileDropInput from './FileDropInput'
 
 const MAX_RECOMMENDED_MB = 10
 const MAX_ALLOWED_MB = 30
@@ -16,8 +17,7 @@ export default function VideoInput({ defaultYoutubeUrl = '', onYoutubeChange, on
   const [fileSizeMB, setFileSizeMB] = useState<number | null>(null)
   const [fileError, setFileError] = useState<string | null>(null)
 
-  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
+  function handleFileSelect(file: File | null) {
     if (!file) {
       setFileSizeMB(null)
       setFileError(null)
@@ -31,7 +31,6 @@ export default function VideoInput({ defaultYoutubeUrl = '', onYoutubeChange, on
     if (sizeMB > MAX_ALLOWED_MB) {
       setFileError(`File terlalu besar (${sizeMB.toFixed(1)}MB). Maksimal ${MAX_ALLOWED_MB}MB — silakan pakai link YouTube.`)
       onFileChange(null)
-      e.target.value = ''
       return
     }
 
@@ -43,11 +42,11 @@ export default function VideoInput({ defaultYoutubeUrl = '', onYoutubeChange, on
     <div className="space-y-3">
       <div className="flex gap-2">
         <button type="button" onClick={() => setMode('youtube')}
-          className={`px-4 py-2 rounded-md text-sm font-medium ${mode === 'youtube' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}>
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${mode === 'youtube' ? 'bg-blue-700 text-white' : 'bg-gray-100 text-gray-600'}`}>
           Link YouTube
         </button>
         <button type="button" onClick={() => setMode('upload')}
-          className={`px-4 py-2 rounded-md text-sm font-medium ${mode === 'upload' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}>
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${mode === 'upload' ? 'bg-blue-700 text-white' : 'bg-gray-100 text-gray-600'}`}>
           Upload File
         </button>
       </div>
@@ -59,31 +58,36 @@ export default function VideoInput({ defaultYoutubeUrl = '', onYoutubeChange, on
             placeholder="https://youtube.com/watch?v=..."
             defaultValue={defaultYoutubeUrl}
             onChange={(e) => onYoutubeChange(e.target.value)}
-            className="w-full border rounded-md px-3 py-2 text-sm"
+            className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-          <p className="text-xs text-gray-500 mt-1">Video di-set "Unlisted" di YouTube tetap bisa di-embed.</p>
+          <p className="text-xs text-gray-400 mt-1.5">Video "Unlisted" di YouTube tetap bisa di-embed.</p>
         </div>
       )}
 
       {mode === 'upload' && (
         <div>
-          <input type="file" accept="video/*" onChange={handleFileSelect} className="w-full text-sm" />
+          <FileDropInput
+            id="video-berita"
+            accept="video/*"
+            kind="video"
+            onFileSelect={handleFileSelect}
+            helperText={`Maks ${MAX_ALLOWED_MB}MB`}
+          />
 
           {fileSizeMB !== null && !fileError && (
-            <p className="text-xs text-gray-500 mt-1">Ukuran file: {fileSizeMB.toFixed(1)}MB</p>
+            <p className="text-xs text-gray-500 mt-1.5">Ukuran file: {fileSizeMB.toFixed(1)}MB</p>
           )}
 
           {fileError && (
-            <div className="mt-2 bg-red-50 border border-red-200 rounded-md p-3">
+            <div className="mt-2 bg-red-50 border border-red-100 rounded-lg p-3">
               <p className="text-sm text-red-700">{fileError}</p>
             </div>
           )}
 
           {fileSizeMB !== null && fileSizeMB > MAX_RECOMMENDED_MB && !fileError && (
-            <div className="mt-2 bg-yellow-50 border border-yellow-200 rounded-md p-3">
-              <p className="text-sm text-yellow-800">
-                ⚠️ File ini {fileSizeMB.toFixed(1)}MB, lebih besar dari yang disarankan ({MAX_RECOMMENDED_MB}MB).
-                Sebaiknya upload ke YouTube dulu (bisa "Unlisted") lalu pakai link-nya di sini.
+            <div className="mt-2 bg-amber-50 border border-amber-100 rounded-lg p-3">
+              <p className="text-sm text-amber-800">
+                File ini {fileSizeMB.toFixed(1)}MB, lebih besar dari rekomendasi ({MAX_RECOMMENDED_MB}MB). Sebaiknya upload ke YouTube dulu supaya website tetap ringan.
               </p>
             </div>
           )}
