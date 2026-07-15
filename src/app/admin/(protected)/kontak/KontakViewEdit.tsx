@@ -6,6 +6,8 @@ import FormKontak from "./FormKontak";
 interface KontakData {
   alamat: string | null;
   telepon: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export default function KontakViewEdit({ initialData }: { initialData: KontakData }) {

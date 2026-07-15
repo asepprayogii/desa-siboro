@@ -8,8 +8,8 @@ interface FormKontakProps {
   initialData: {
     alamat: string | null;
     telepon: string | null;
-    latitude: number | null;
-    longitude: number | null;
+    latitude?: number | null;
+    longitude?: number | null;
   };
   onSaved?: () => void;
 }
