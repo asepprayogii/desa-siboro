@@ -20,10 +20,12 @@ function DefaultAvatar() {
 export default async function StrukturPage() {
   const supabase = await createClient();
 
-  const { data: perangkat } = await supabase
-    .from("perangkat_desa")
-    .select("*")
-    .order("urutan", { ascending: true });
+  const [{ data: perangkat }, { data: struktur }] = await Promise.all([
+    supabase.from("perangkat_desa").select("*").order("urutan", { ascending: true }),
+    supabase.from("struktur_desa").select("*").eq("id", 1).single(),
+  ]);
+
+  const mode = struktur?.mode || "manual";
 
   const kepalaDesa = perangkat?.[0];
   const perangkatLain = perangkat?.slice(1) || [];
@@ -39,7 +41,12 @@ export default async function StrukturPage() {
           <div className="w-12 h-1 bg-blue-700 mx-auto mt-4 rounded-full" />
         </div>
 
-        {perangkat && perangkat.length > 0 ? (
+        {mode === "gambar" && struktur?.gambar_url ? (
+          <div className="relative w-full rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={struktur.gambar_url} alt="Struktur Perangkat Desa Siboro" className="w-full h-auto" />
+          </div>
+        ) : perangkat && perangkat.length > 0 ? (
           <>
             {/* KEPALA DESA - ditonjolkan */}
             {kepalaDesa && (
