@@ -11,7 +11,7 @@ export default async function Home() {
     supabase.from("perangkat_desa").select("*", { count: "exact", head: true }),
     supabase.from("galeri").select("id", { count: "exact", head: true }),
     supabase.from("perangkat_desa").select("*").order("urutan", { ascending: true }),
-    supabase.from("galeri").select("id, gambar_url, keterangan").order("created_at", { ascending: false }).limit(4),
+    supabase.from("galeri").select("id, gambar_url, keterangan").not("gambar_url", "is", null).order("created_at", { ascending: false }).limit(4),
   ]);
 
   const totalBerita = beritaTerbaru?.length ?? 0;

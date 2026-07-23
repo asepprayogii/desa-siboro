@@ -1,95 +1,153 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
-import imageCompression from "browser-image-compression";
-import FileDropInput from "@/components/FileDropInput";
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import imageCompression from 'browser-image-compression'
+import FileDropInput from '@/components/FileDropInput'
+import VideoInput from '@/components/VideoInput'
 
 export default function UploadGaleriForm() {
-  const [file, setFile] = useState<File | null>(null);
-  const [keterangan, setKeterangan] = useState("");
-  const [compressing, setCompressing] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<'foto' | 'video'>('foto')
 
-  const router = useRouter();
-  const supabase = createClient();
+  const [file, setFile] = useState<File | null>(null)
+  const [compressing, setCompressing] = useState(false)
 
-  async function handleFileSelect(file: File | null) {
-    if (!file) {
-      setFile(null);
-      return;
+  const [youtubeUrl, setYoutubeUrl] = useState('')
+  const [videoFile, setVideoFile] = useState<File | null>(null)
+
+  const [keterangan, setKeterangan] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const router = useRouter()
+  const supabase = createClient()
+
+  async function handleFileSelect(selected: File | null) {
+    if (!selected) {
+      setFile(null)
+      return
     }
-
-    if (!file.type.startsWith("image/")) {
-      alert("File yang dipilih bukan gambar. Silakan pilih file JPG, PNG, atau format gambar lainnya.");
-      setFile(null);
-      return;
-    }
-
-    setCompressing(true);
+    setCompressing(true)
     try {
-      const compressed = await imageCompression(file, {
+      const compressed = await imageCompression(selected, {
         maxSizeMB: 0.5,
         maxWidthOrHeight: 1280,
         useWebWorker: true,
-      });
-      setFile(compressed);
+      })
+      setFile(compressed)
     } catch {
-      alert("Gagal memproses gambar. Coba pilih file gambar lain.");
-      setFile(null);
+      alert('Gagal memproses gambar. Coba pilih file gambar lain.')
+      setFile(null)
     }
-    setCompressing(false);
+    setCompressing(false)
+  }
+
+  function resetForm() {
+    setFile(null)
+    setYoutubeUrl('')
+    setVideoFile(null)
+    setKeterangan('')
   }
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!file) {
-      alert("Pilih gambar dulu");
-      return;
+    e.preventDefault()
+
+    if (mode === 'foto' && !file) {
+      alert('Pilih gambar dulu')
+      return
+    }
+    if (mode === 'video' && !youtubeUrl && !videoFile) {
+      alert('Isi link YouTube atau pilih file video dulu')
+      return
     }
 
-    setLoading(true);
+    setLoading(true)
 
-    const fileName = `${Date.now()}-${file.name}`;
-    const { error: uploadError } = await supabase.storage.from("desa-images").upload(fileName, file);
+    if (mode === 'foto') {
+      const fileName = `${Date.now()}-${file!.name}`
+      const { error: uploadError } = await supabase.storage.from('desa-images').upload(fileName, file!)
+      if (uploadError) {
+        alert('Upload gagal: ' + uploadError.message)
+        setLoading(false)
+        return
+      }
+      const { data: urlData } = supabase.storage.from('desa-images').getPublicUrl(fileName)
 
-    if (uploadError) {
-      alert("Upload gagal: " + uploadError.message);
-      setLoading(false);
-      return;
+      const { error } = await supabase.from('galeri').insert({
+        gambar_url: urlData.publicUrl,
+        keterangan: keterangan || null,
+      })
+      if (error) {
+        alert('Gagal simpan: ' + error.message)
+        setLoading(false)
+        return
+      }
+    } else {
+      let video_file_url: string | null = null
+
+      if (videoFile) {
+        const fileName = `${Date.now()}-${videoFile.name}`
+        const { error: uploadError } = await supabase.storage.from('desa-videos').upload(fileName, videoFile)
+        if (uploadError) {
+          alert('Upload video gagal: ' + uploadError.message)
+          setLoading(false)
+          return
+        }
+        const { data: urlData } = supabase.storage.from('desa-videos').getPublicUrl(fileName)
+        video_file_url = urlData.publicUrl
+      }
+
+      const { error } = await supabase.from('galeri').insert({
+        video_url: youtubeUrl || null,
+        video_file_url,
+        keterangan: keterangan || null,
+      })
+      if (error) {
+        alert('Gagal simpan: ' + error.message)
+        setLoading(false)
+        return
+      }
     }
 
-    const { data: urlData } = supabase.storage.from("desa-images").getPublicUrl(fileName);
-
-    const { error } = await supabase.from("galeri").insert({
-      gambar_url: urlData.publicUrl,
-      keterangan: keterangan || null,
-    });
-
-    if (error) {
-      alert("Gagal simpan: " + error.message);
-      setLoading(false);
-      return;
-    }
-
-    setFile(null);
-    setKeterangan("");
-    setLoading(false);
-    router.refresh();
-
-    const fileInput = document.getElementById("galeri-file-input") as HTMLInputElement;
-    if (fileInput) fileInput.value = "";
+    resetForm()
+    setLoading(false)
+    router.refresh()
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="font-semibold text-gray-900 text-sm">Tambah Foto</h2>
+      <h2 className="font-semibold text-gray-900 text-sm">Tambah ke Galeri</h2>
 
-      <div>
-        <FileDropInput id="galeri-file-input" accept="image/*" onFileSelect={handleFileSelect} helperText="PNG atau JPG" />
-        {compressing && <p className="text-xs text-gray-500 mt-1.5">Mengompres gambar...</p>}
+      {/* Toggle Foto/Video */}
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => { setMode('foto'); resetForm() }}
+          className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            mode === 'foto' ? 'bg-blue-700 text-white' : 'bg-gray-100 text-gray-600'
+          }`}
+        >
+          Foto
+        </button>
+        <button
+          type="button"
+          onClick={() => { setMode('video'); resetForm() }}
+          className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            mode === 'video' ? 'bg-blue-700 text-white' : 'bg-gray-100 text-gray-600'
+          }`}
+        >
+          Video
+        </button>
       </div>
+
+      {mode === 'foto' ? (
+        <div>
+          <FileDropInput id="galeri-foto-input" accept="image/*" onFileSelect={handleFileSelect} helperText="PNG atau JPG" />
+          {compressing && <p className="text-xs text-gray-500 mt-1.5">Mengompres gambar...</p>}
+        </div>
+      ) : (
+        <VideoInput onYoutubeChange={setYoutubeUrl} onFileChange={setVideoFile} />
+      )}
 
       <div>
         <input
@@ -101,9 +159,13 @@ export default function UploadGaleriForm() {
         />
       </div>
 
-      <button type="submit" disabled={loading || compressing || !file} className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50">
-        {loading ? "Mengunggah..." : "Upload Foto"}
+      <button
+        type="submit"
+        disabled={loading || compressing}
+        className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+      >
+        {loading ? 'Mengunggah...' : mode === 'foto' ? 'Upload Foto' : 'Tambah Video'}
       </button>
     </form>
-  );
+  )
 }

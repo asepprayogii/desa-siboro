@@ -1,60 +1,43 @@
-import { createClient } from '@/lib/supabase/server'
-import Image from 'next/image'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { Metadata } from 'next'
-
-function getYoutubeEmbedUrl(url: string): string | null {
-  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]+)/)
-  return match ? `https://www.youtube.com/embed/${match[1]}` : null
-}
+import { createClient } from "@/lib/supabase/server";
+import { getVideoEmbedUrl } from "@/lib/video";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Metadata } from "next";
 
 function formatTanggal(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('id-ID', {
-    day: 'numeric', month: 'long', year: 'numeric'
-  })
+  return new Date(dateStr).toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params
-  const supabase = await createClient()
+  const { slug } = await params;
+  const supabase = await createClient();
 
-  const { data: berita } = await supabase
-    .from('berita')
-    .select('judul, isi')
-    .eq('slug', slug)
-    .single()
+  const { data: berita } = await supabase.from("berita").select("judul, isi").eq("slug", slug).single();
 
-  if (!berita) return { title: 'Berita Tidak Ditemukan' }
+  if (!berita) return { title: "Berita Tidak Ditemukan" };
 
   return {
     title: `${berita.judul} - Desa Siboro`,
     description: berita.isi.slice(0, 155),
-  }
+  };
 }
 
 export default async function DetailBerita({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-  const supabase = await createClient()
+  const { slug } = await params;
+  const supabase = await createClient();
 
-  const { data: berita } = await supabase
-    .from('berita')
-    .select('*')
-    .eq('slug', slug)
-    .eq('published', true)
-    .single()
+  const { data: berita } = await supabase.from("berita").select("*").eq("slug", slug).eq("published", true).single();
 
-  if (!berita) notFound()
+  if (!berita) notFound();
 
-  const { data: beritaTerbaru } = await supabase
-    .from('berita')
-    .select('judul, slug, gambar_url, created_at')
-    .eq('published', true)
-    .neq('slug', slug)
-    .order('created_at', { ascending: false })
-    .limit(5)
+  const { data: beritaTerbaru } = await supabase.from("berita").select("judul, slug, gambar_url, created_at").eq("published", true).neq("slug", slug).order("created_at", { ascending: false }).limit(5);
 
-  const youtubeEmbed = berita.video_url ? getYoutubeEmbedUrl(berita.video_url) : null
+  const videoEmbed = berita.video_url ? getVideoEmbedUrl(berita.video_url) : null;
 
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
@@ -68,9 +51,7 @@ export default async function DetailBerita({ params }: { params: Promise<{ slug:
             Kembali ke Daftar Berita
           </Link>
 
-          <span className="inline-block bg-amber-400 text-blue-950 text-xs font-semibold px-3 py-1 rounded-full mb-3">
-            {berita.kategori || 'Umum'}
-          </span>
+          <span className="inline-block bg-amber-400 text-blue-950 text-xs font-semibold px-3 py-1 rounded-full mb-3">{berita.kategori || "Umum"}</span>
 
           <h1 className="text-xl font-bold leading-snug mb-4">{berita.judul}</h1>
 
@@ -91,9 +72,7 @@ export default async function DetailBerita({ params }: { params: Promise<{ slug:
             <Link href="/berita" className="inline-flex items-center gap-2 text-blue-700 text-sm mb-4">
               ← Kembali ke Daftar Berita
             </Link>
-            <span className="inline-block bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1 rounded-full mb-2">
-              {berita.kategori || 'Umum'}
-            </span>
+            <span className="inline-block bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1 rounded-full mb-2">{berita.kategori || "Umum"}</span>
             <h1 className="text-2xl font-bold leading-snug">{berita.judul}</h1>
             <p className="text-sm text-gray-500 mt-2">Dipublikasikan {formatTanggal(berita.created_at)}</p>
           </div>
@@ -107,21 +86,15 @@ export default async function DetailBerita({ params }: { params: Promise<{ slug:
                 </div>
               )}
 
-              <div className="prose max-w-none text-gray-700 leading-relaxed whitespace-pre-line">
-                {berita.isi}
-              </div>
+              <div className="prose max-w-none text-gray-700 leading-relaxed whitespace-pre-line">{berita.isi}</div>
 
-              {youtubeEmbed && (
+              {videoEmbed && (
                 <div className="mt-8 aspect-video rounded-2xl overflow-hidden shadow-lg">
-                  <iframe
-                    src={youtubeEmbed}
-                    className="w-full h-full"
-                    allowFullScreen
-                  />
+                  <iframe src={videoEmbed} className="w-full h-full" allowFullScreen />
                 </div>
               )}
 
-              {!youtubeEmbed && berita.video_file_url && (
+              {!videoEmbed && berita.video_file_url && (
                 <div className="mt-8 rounded-2xl overflow-hidden shadow-lg">
                   <video controls className="w-full">
                     <source src={berita.video_file_url} />
@@ -146,22 +119,12 @@ export default async function DetailBerita({ params }: { params: Promise<{ slug:
                 {beritaTerbaru && beritaTerbaru.length > 0 ? (
                   <div className="space-y-4">
                     {beritaTerbaru.map((b) => (
-                      <Link
-                        key={b.slug}
-                        href={`/berita/${b.slug}`}
-                        className="flex gap-3 group"
-                      >
+                      <Link key={b.slug} href={`/berita/${b.slug}`} className="flex gap-3 group">
                         <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
-                          {b.gambar_url ? (
-                            <Image src={b.gambar_url} alt={b.judul} fill className="object-cover" />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-blue-100 to-amber-100" />
-                          )}
+                          {b.gambar_url ? <Image src={b.gambar_url} alt={b.judul} fill className="object-cover" /> : <div className="w-full h-full bg-gradient-to-br from-blue-100 to-amber-100" />}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-700 transition-colors leading-snug">
-                            {b.judul}
-                          </p>
+                          <p className="text-sm font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-700 transition-colors leading-snug">{b.judul}</p>
                           <p className="text-xs text-gray-400 mt-1">{formatTanggal(b.created_at)}</p>
                         </div>
                       </Link>
@@ -176,5 +139,5 @@ export default async function DetailBerita({ params }: { params: Promise<{ slug:
         </div>
       </div>
     </main>
-  )
+  );
 }
